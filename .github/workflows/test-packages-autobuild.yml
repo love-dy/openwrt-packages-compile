@@ -168,11 +168,11 @@ jobs:
         done
         cd openwrt
         make defconfig
-        mv -f package/feeds/love-dy love-dy.b
+        mv -f package/feeds/lovedy lovedy.b
         mv -f feeds/packages/lang feeds/packages/lang.b
         mv -f feeds/packages feeds/packages.b
         mkdir package/feeds/love-dy
-        cp -rf love-dy.b/{wxbase,lib*,rapidjson,jpcre2,toml11,gn,curl,quickjspp,qt*,libtorrent*,openssl,mbedtls,ppp,cups,nftables} package/feeds/love-dy/ || true
+        cp -rf lovedy.b/{wxbase,lib*,rapidjson,jpcre2,toml11,gn,curl,quickjspp,qt*,libtorrent*,openssl,mbedtls,ppp,cups,nftables} package/feeds/love-dy/ || true
 
     - name: Compile the firmware
       run: |
@@ -182,7 +182,7 @@ jobs:
           during="$(echo "${{github.event.action}}" | grep -o -E ' [0-9][0-9.]*' | sed -e 's/ //')"
           function comp(){
              echo "compile $ipk"
-             cp -rf love-dy.b/$ipk package/feeds/love-dy/
+             cp -rf lovedy.b/$ipk package/feeds/love-dy/
              if [[ $ipk != luci-* ]]; then
               mv -f feeds/packages.b feeds/packages
               mv feeds/packages/lang.b feeds/packages/lang
@@ -196,7 +196,7 @@ jobs:
               rm -rf package/feeds/love-dy/$ipk
              fi
             }
-          for ipk in $(ls love-dy.b | grep -E "$fpkg"); do
+          for ipk in $(ls lovedy.b | grep -E "$fpkg"); do
             echo $ipk
             if [[ "$fpkg" && ! "$during" ]]; then
               comp
