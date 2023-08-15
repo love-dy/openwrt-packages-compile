@@ -148,8 +148,8 @@ jobs:
           echo >> .config
           cat devices/${{matrix.target}}/.config >> .config
         fi
-        #if [[ ${{github.actor}} == "love-dy" ]]; then
-          #sed -i "s/index()/index()\nif luci.sys.exec(\"cat \/etc\/openwrt_release | grep -o -E ^DISTRIB_DESCRIPTION='.*(GaryPang|Kiddin)'\") == \"\" then return end/g" package/feeds/love-dy/luci-app*/luasrc/controller/*.lua
+        #if [[ ${{github.actor}} == "lovedy" ]]; then
+          #sed -i "s/index()/index()\nif luci.sys.exec(\"cat \/etc\/openwrt_release | grep -o -E ^DISTRIB_DESCRIPTION='.*(GaryPang|Kiddin)'\") == \"\" then return end/g" package/feeds/lovedy/luci-app*/luasrc/controller/*.lua
         #fi
 
     - name: SSH connection to Actions
@@ -168,8 +168,8 @@ jobs:
         mv -f package/feeds/lovedy lovedy.b
         mv -f feeds/packages/lang feeds/packages/lang.b
         mv -f feeds/packages feeds/packages.b
-        mkdir package/feeds/love-dy
-        cp -rf lovedy.b/{wxbase,lib*,rapidjson,jpcre2,toml11,gn,curl,quickjspp,qt*,libtorrent*,openssl,mbedtls,ppp,cups,nftables} package/feeds/love-dy/ || true
+        mkdir package/feeds/lovedy
+        cp -rf lovedy.b/{wxbase,lib*,rapidjson,jpcre2,toml11,gn,curl,quickjspp,qt*,libtorrent*,openssl,mbedtls,ppp,cups,nftables} package/feeds/lovedy/ || true
 
     - name: Compile the firmware
       run: |
@@ -179,18 +179,18 @@ jobs:
           during="$(echo "${{github.event.action}}" | grep -o -E ' [0-9][0-9.]*' | sed -e 's/ //')"
           function comp(){
              echo "compile $ipk"
-             cp -rf lovedy.b/$ipk package/feeds/love-dy/
+             cp -rf lovedy.b/$ipk package/feeds/lovedy/
              if [[ $ipk != luci-* ]]; then
               mv -f feeds/packages.b feeds/packages
               mv feeds/packages/lang.b feeds/packages/lang
-              [ "$(grep "PKG_BUILD_DEPENDS" package/feeds/love-dy/$ipk/Makefile)" ] || mv feeds/packages/lang/node feeds/packages/lang/node.b
+              [ "$(grep "PKG_BUILD_DEPENDS" package/feeds/lovedy/$ipk/Makefile)" ] || mv feeds/packages/lang/node feeds/packages/lang/node.b
              fi
              (make package/$ipk/compile -j$(($(nproc)+1)) || make package/$ipk/compile V=s 2>&1 | tee error_$ipk.log | grep -i "Error 2" || rm -rf error_$ipk.log) || true
              if [[ $ipk != luci-* ]]; then
               mv -f feeds/packages/lang feeds/packages/lang.b 2>/dev/null || true
               mv -f feeds/packages/lang.b/node.b feeds/packages/lang.b/node 2>/dev/null || true
               mv -f feeds/packages feeds/packages.b
-              rm -rf package/feeds/love-dy/$ipk
+              rm -rf package/feeds/lovedy/$ipk
              fi
             }
           for ipk in $(ls lovedy.b | grep -E "$fpkg"); do
