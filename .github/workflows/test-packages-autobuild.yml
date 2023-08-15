@@ -226,7 +226,7 @@ jobs:
       id: organize
       run: |
         mkdir packages
-        mv -f openwrt/bin/packages/*/love-dy/* packages || true
+        mv -f openwrt/bin/packages/*/lovedy/* packages || true
         mv -f openwrt/.config packages/${{matrix.target}}.config || true
         echo "FIRMWARE=$PWD/packages" >> $GITHUB_ENV
         echo "NAME=${{ env.date2 }} ${{matrix.target}}" >> $GITHUB_ENV
