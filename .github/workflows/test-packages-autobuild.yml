@@ -57,19 +57,19 @@ jobs:
         echo "UPLOAD_FIRMWARE_TO_COWTRANSFER=${UPLOAD_FIRMWARE_TO_COWTRANSFER}" >> $GITHUB_ENV
         echo "UPLOAD_FIRMWARE_TO_WETRANSFER=${UPLOAD_FIRMWARE_TO_WETRANSFER}" >> $GITHUB_ENV
         if [[ "${{matrix.target}}" == arm_* ]]; then
-          echo "REPO_TOKEN=${{ secrets.TOKEN_KKKIDDING }}" >> $GITHUB_ENV
+          echo "REPO_TOKEN=${{ secrets.ACCESS_TOKEN }}" >> $GITHUB_ENV
         else
-          echo "REPO_TOKEN=${{ secrets.TOKEN_KKKKIDDIN }}" >> $GITHUB_ENV
+          echo "REPO_TOKEN=${{ secrets.ACCESS_TOKEN }}" >> $GITHUB_ENV
         fi
         sed -i "1a REPO_TOKEN=${{ env.REPO_TOKEN }}" ${GITHUB_WORKSPACE}/devices/common/custom.sh
 
     - name: Trigger Packages Update
       run: |
-        gitdate="$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/kiddin9/openwrt-packages/actions/runs" | jq -r '.workflow_runs[0].created_at')" || true
+        gitdate="$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/love-dy/openwrt-packages/actions/runs" | jq -r '.workflow_runs[0].created_at')" || true
         gitdate="$(date -d "$gitdate" +%s)" || true
         now="$(date -d "$(date)" +%s)"
         if [[ $(expr $gitdate + 120) < $now ]]; then
-        curl -X POST https://api.github.com/repos/kiddin9/openwrt-packages/dispatches \
+        curl -X POST https://api.github.com/repos/love-dy/openwrt-packages/dispatches \
         -H "Accept: application/vnd.github.everest-preview+json" \
         -H "Authorization: token ${{ env.REPO_TOKEN }}" \
         --data '{"event_type": "update"}'
@@ -99,36 +99,10 @@ jobs:
       run: |
         #REPO_BRANCH="$(curl -s https://api.github.com/repos/openwrt/openwrt/tags | jq -r '.[].name' | grep v22 | head -n 1 | sed -e 's/v//')" || true
         REPO_BRANCH="23.05-SNAPSHOT"
-        if [ ${{matrix.target}} == "mipsel_24kc" ]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/ramips/mt7621/openwrt-sdk-$REPO_BRANCH-ramips-mt7621_gcc-12.3.0_musl.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/ramips/mt7621/openwrt-sdk-$REPO_BRANCH-ramips-mt7621_gcc-12.3.0_musl.Linux-x86_64.tar.xz 
-        elif [ ${{matrix.target}} == "mips_24kc" ]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/ath79/nand/openwrt-sdk-$REPO_BRANCH-ath79-nand_gcc-12.3.0_musl.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/ath79/nand/openwrt-sdk-$REPO_BRANCH-ath79-nand_gcc-12.3.0_musl.Linux-x86_64.tar.xz 
-        elif [[ ${{matrix.target}} == "x86_64" ]]; then
+        if [[ ${{matrix.target}} == "x86_64" ]]; then
             curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/x86/64/openwrt-sdk-$REPO_BRANCH-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/x86/64/openwrt-sdk-$REPO_BRANCH-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "i386_pentium4" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/x86/generic/openwrt-sdk-$REPO_BRANCH-x86-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/x86/generic/openwrt-sdk-$REPO_BRANCH-x86-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
         elif [[ ${{matrix.target}} == "aarch64_generic" ]]; then
             curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/rockchip/armv8/openwrt-sdk-$REPO_BRANCH-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/rockchip/armv8/openwrt-sdk-$REPO_BRANCH-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_arm1176jzf-s_vfp" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/bcm27xx/bcm2708/openwrt-sdk-$REPO_BRANCH-bcm27xx-bcm2708_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/bcm27xx/bcm2708/openwrt-sdk-$REPO_BRANCH-bcm27xx-bcm2708_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_cortex-a15_neon-vfpv4" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/ipq806x/generic/openwrt-sdk-$REPO_BRANCH-ipq806x-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/ipq806x/generic/openwrt-sdk-$REPO_BRANCH-ipq806x-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_cortex-a5_vfpv4" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/at91/sama5/openwrt-sdk-$REPO_BRANCH-at91-sama5_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/at91/sama5/openwrt-sdk-$REPO_BRANCH-at91-sama5_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "aarch64_cortex-a72" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/bcm27xx/bcm2711/openwrt-sdk-$REPO_BRANCH-bcm27xx-bcm2711_gcc-12.3.0_musl.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/bcm27xx/bcm2711/openwrt-sdk-$REPO_BRANCH-bcm27xx-bcm2711_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "aarch64_cortex-a53" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/mediatek/mt7622/openwrt-sdk-$REPO_BRANCH-mediatek-mt7622_gcc-12.3.0_musl.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/mediatek/mt7622/openwrt-sdk-$REPO_BRANCH-mediatek-mt7622_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_cortex-a7_neon-vfpv4" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/ipq40xx/generic/openwrt-sdk-$REPO_BRANCH-ipq40xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/ipq40xx/generic/openwrt-sdk-$REPO_BRANCH-ipq40xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_cortex-a7" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/mediatek/mt7629/openwrt-sdk-$REPO_BRANCH-mediatek-mt7629_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/mediatek/mt7629/openwrt-sdk-$REPO_BRANCH-mediatek-mt7629_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_cortex-a9" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/bcm53xx/generic/openwrt-sdk-$REPO_BRANCH-bcm53xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/bcm53xx/generic/openwrt-sdk-$REPO_BRANCH-bcm53xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_cortex-a9_vfpv3-d16" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/mvebu/cortexa9/openwrt-sdk-$REPO_BRANCH-mvebu-cortexa9_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/mvebu/cortexa9/openwrt-sdk-$REPO_BRANCH-mvebu-cortexa9_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
-        elif [[ ${{matrix.target}} == "arm_xscale" ]]; then
-            curl -fL -m 150 -o sdk.tar.xz https://downloads.openwrt.org/releases/$REPO_BRANCH/targets/kirkwood/generic/openwrt-sdk-$REPO_BRANCH-kirkwood-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz || curl -fL -m 150 -o sdk.tar.xz https://downloads.cdn.openwrt.org/releases/$REPO_BRANCH/targets/kirkwood/generic/openwrt-sdk-$REPO_BRANCH-kirkwood-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
         fi
 
     - name: Free up disk space
@@ -172,7 +146,7 @@ jobs:
           echo >> .config
           cat devices/${{matrix.target}}/.config >> .config
         fi
-        #if [[ ${{github.actor}} == "kiddin9" ]]; then
+        #if [[ ${{github.actor}} == "love-dy" ]]; then
           #sed -i "s/index()/index()\nif luci.sys.exec(\"cat \/etc\/openwrt_release | grep -o -E ^DISTRIB_DESCRIPTION='.*(GaryPang|Kiddin)'\") == \"\" then return end/g" package/feeds/kiddin9/luci-app*/luasrc/controller/*.lua
         #fi
 
@@ -182,47 +156,47 @@ jobs:
 
     - name: Prepare
       run: |
-        status=$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/kiddin9/openwrt-packages/actions/runs" | jq -r '.workflow_runs[0].status')
+        status=$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/love-dy/openwrt-packages/actions/runs" | jq -r '.workflow_runs[0].status')
         while [ "$status" == "in_progress" ];do
           sleep 5
-          status=$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/kiddin9/openwrt-packages/actions/runs" | jq -r '.workflow_runs[0].status')
+          status=$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/love-dy/openwrt-packages/actions/runs" | jq -r '.workflow_runs[0].status')
         done
         cd openwrt
         make defconfig
-        mv -f package/feeds/kiddin9 kiddin9.b
+        mv -f package/feeds/love-dy love-dy.b
         mv -f feeds/packages/lang feeds/packages/lang.b
         mv -f feeds/packages feeds/packages.b
-        mkdir package/feeds/kiddin9
-        cp -rf kiddin9.b/{wxbase,lib*,rapidjson,jpcre2,toml11,gn,curl,quickjspp,qt*,libtorrent*,openssl,mbedtls,ppp,cups,nftables} package/feeds/kiddin9/ || true
+        mkdir package/feeds/love-dy
+        cp -rf love-dy.b/{wxbase,lib*,rapidjson,jpcre2,toml11,gn,curl,quickjspp,qt*,libtorrent*,openssl,mbedtls,ppp,cups,nftables} package/feeds/love-dy/ || true
 
     - name: Compile the firmware
       run: |
         cd openwrt
           echo -e "$(($(nproc)+1)) thread compile"
-          fpkg="$(echo "${{github.event.action}}" | sed -e 's/\(aarch64_generic\|x86_64\|i386_pentium4\|arm_arm1176jzf-s_vfp\|aarch64_cortex-a72\|arm_cortex-a7\|arm_cortex-a7_neon-vfpv4\|arm_cortex-a9\|arm_cortex-a15_neon-vfpv4\|arm_cortex-a5_vfpv4\|mipsel_24kc\|mips_24kc\|aarch64_cortex-a53\|arm_xscale\|arm_cortex-a9_vfpv3-d16\| [0-9][0-9.]*\| ssh\| noser\| cw\)//g' | sed -e 's/ //g')"
+          fpkg="$(echo "${{github.event.action}}" | sed -e 's/\(aarch64_generic\|x86_64\| [0-9][0-9.]*\| ssh\| noser\| cw\)//g' | sed -e 's/ //g')"
           during="$(echo "${{github.event.action}}" | grep -o -E ' [0-9][0-9.]*' | sed -e 's/ //')"
           function comp(){
              echo "compile $ipk"
-             cp -rf kiddin9.b/$ipk package/feeds/kiddin9/
+             cp -rf love-dy.b/$ipk package/feeds/love-dy/
              if [[ $ipk != luci-* ]]; then
               mv -f feeds/packages.b feeds/packages
               mv feeds/packages/lang.b feeds/packages/lang
-              [ "$(grep "PKG_BUILD_DEPENDS" package/feeds/kiddin9/$ipk/Makefile)" ] || mv feeds/packages/lang/node feeds/packages/lang/node.b
+              [ "$(grep "PKG_BUILD_DEPENDS" package/feeds/love-dy/$ipk/Makefile)" ] || mv feeds/packages/lang/node feeds/packages/lang/node.b
              fi
              (make package/$ipk/compile -j$(($(nproc)+1)) || make package/$ipk/compile V=s 2>&1 | tee error_$ipk.log | grep -i "Error 2" || rm -rf error_$ipk.log) || true
              if [[ $ipk != luci-* ]]; then
               mv -f feeds/packages/lang feeds/packages/lang.b 2>/dev/null || true
               mv -f feeds/packages/lang.b/node.b feeds/packages/lang.b/node 2>/dev/null || true
               mv -f feeds/packages feeds/packages.b
-              rm -rf package/feeds/kiddin9/$ipk
+              rm -rf package/feeds/love-dy/$ipk
              fi
             }
-          for ipk in $(ls kiddin9.b | grep -E "$fpkg"); do
+          for ipk in $(ls love-dy.b | grep -E "$fpkg"); do
             echo $ipk
             if [[ "$fpkg" && ! "$during" ]]; then
               comp
             else
-              gitdate="$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/kiddin9/openwrt-packages/commits?path=$ipk&per_page=1" | jq -r '.[0].commit.committer.date')" || true
+              gitdate="$(curl -H "Authorization: token ${{ env.REPO_TOKEN }}" -s "https://api.github.com/repos/love-dy/openwrt-packages/commits?path=$ipk&per_page=1" | jq -r '.[0].commit.committer.date')" || true
               if [[ "$gitdate" && "$gitdate" != null ]]; then
                 gitdate="$(date -d "$gitdate" +%s)"
                 now="$(date -d "$(date)" +%s)"
@@ -250,7 +224,7 @@ jobs:
       id: organize
       run: |
         mkdir packages
-        mv -f openwrt/bin/packages/*/kiddin9/* packages || true
+        mv -f openwrt/bin/packages/*/love-dy/* packages || true
         mv -f openwrt/.config packages/${{matrix.target}}.config || true
         # cp -Rf openwrt/bin/packages/*/packages/python3* packages/
         echo "FIRMWARE=$PWD/packages" >> $GITHUB_ENV
