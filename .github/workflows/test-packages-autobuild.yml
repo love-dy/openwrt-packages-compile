@@ -231,15 +231,8 @@ jobs:
         mkdir packages
         mv -f openwrt/bin/packages/*/love-dy/* packages || true
         mv -f openwrt/.config packages/${{matrix.target}}.config || true
-        # cp -Rf openwrt/bin/packages/*/packages/python3* packages/
         echo "FIRMWARE=$PWD/packages" >> $GITHUB_ENV
-        Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
-        echo "EMOJI=${Emoji[$[$RANDOM % ${#Emoji[@]}]]}" >> $GITHUB_ENV
-        if [[ $(ls -l openwrt/error* | grep "^-" | wc -l) -le 0 ]]; then
-           echo "NAME=${Emoji[$[$RANDOM % ${#Emoji[@]}]]} ${{ env.date2 }} ${{matrix.target}} ${{ env.EMOJI }}" >> $GITHUB_ENV
-        else
-           echo "NAME=❌ ${{ env.date2 }} ${{matrix.target}} ❌" >> $GITHUB_ENV
-        fi
+        echo "NAME=${{ env.date2 }} ${{matrix.target}}" >> $GITHUB_ENV
 
     - name: Upload firmware to cowtransfer
       if: env.UPLOAD_FIRMWARE_TO_COWTRANSFER == 'true'
@@ -260,43 +253,22 @@ jobs:
         wetrans=$(echo $wetrans | grep -o -E "https[^ ]*")
         echo "WETRANS=$wetrans" >> $GITHUB_ENV
         echo "Download Link: ${{ env.EMOJI }} $wetrans ${{ env.EMOJI }} 🚀"
-        
-    - name: Create release
-      id: create_release
-      if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true'
-      continue-on-error: true
-      run: |
-        echo -e "墙内加速下载 🚀:\n" >> release.txt
-        echo -e "[腾讯云] (https://op.supes.top/packages/${{matrix.target}}/ ☁)\n" >> release.txt
-        [ ${{ env.WETRANS }} ] && echo -e "[WeTransfer] (${{ env.WETRANS }} 🗽)\n" >> release.txt
-        [ ${{ env.COWURL }} ] && echo -e "[奶牛上传] (${{ env.COWURL }} 🐮)\n" >> release.txt
-        [ ${{ env.NOTICE }} ] && echo -e "${{ env.NOTICE }}" >> release.txt || true
 
     - name: Upload packages for release
       uses: softprops/action-gh-release@master
       continue-on-error: true
       if: env.REPO_TOKEN && env.UPLOAD_FIRMWARE_FOR_RELEASE == 'true'
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN_KIDDIN9 }}
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       with:
         files: |
             packages/*
             openwrt/error*.log
         name: ${{ env.NAME }}
         tag_name: ${{ env.date }}_${{matrix.target}}
-        body_path: release.txt
-
-    - name: deploy files to server
-      uses: easingthemes/ssh-deploy@main
-      if: env.SSH_PRIVATE_KEY && ! contains(github.event.action, 'noser')
-      with:
-        SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
-        ARGS: "-avzr"
-        SOURCE: "packages/"
-        REMOTE_HOST: ${{ secrets.SERVER_HOST }}
-        REMOTE_USER: root
-        REMOTE_PORT: ${{ secrets.SERVER_PORT }}
-        TARGET: "/www/wwwroot/op.supes.top/23.05/packages/${{matrix.target}}/"
+        body: |
+          请选择你需要的升级包！
+          opkg install *.ipk --force-reinstall
 
     - name: Upload packages for artifact
       uses: actions/upload-artifact@main
@@ -306,15 +278,3 @@ jobs:
         name: ${{ env.date3 }} ${{matrix.target}}
         path: packages
 
-    - name: remote ssh command
-      uses: appleboy/ssh-action@master
-      if: env.SSH_PRIVATE_KEY && ! contains(github.event.action, 'noser')
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: root
-        port: ${{ secrets.SERVER_PORT }}
-        key: ${{ env.SSH_PRIVATE_KEY }}
-        script: |
-          # cp -R /www/wwwroot/op.supes.top/packages/keep/common/* /www/wwwroot/op.supes.top/packages/${{matrix.target}}/
-          # cp -R /www/wwwroot/op.supes.top/packages/keep/${{matrix.target}}/* /www/wwwroot/op.supes.top/packages/${{matrix.target}}/
-          bash opkg ${{matrix.target}} &
