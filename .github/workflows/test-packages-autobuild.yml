@@ -152,7 +152,7 @@ jobs:
           cat devices/${{matrix.target}}/.config >> .config
         fi
         #if [[ ${{github.actor}} == "love-dy" ]]; then
-          #sed -i "s/index()/index()\nif luci.sys.exec(\"cat \/etc\/openwrt_release | grep -o -E ^DISTRIB_DESCRIPTION='.*(GaryPang|Kiddin)'\") == \"\" then return end/g" package/feeds/kiddin9/luci-app*/luasrc/controller/*.lua
+          #sed -i "s/index()/index()\nif luci.sys.exec(\"cat \/etc\/openwrt_release | grep -o -E ^DISTRIB_DESCRIPTION='.*(GaryPang|Kiddin)'\") == \"\" then return end/g" package/feeds/love-dy/luci-app*/luasrc/controller/*.lua
         #fi
 
     - name: SSH connection to Actions
